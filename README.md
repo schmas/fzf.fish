@@ -2,6 +2,10 @@
 
 # fzf.fish 🔍🐟
 
+### 🍴 Mantained Fork with Tab Completions ⌨️
+
+All of the functionality is based on the **[Oddlama fork](https://github.com/oddlama/fzf.fish)**. Go give him some love! 💕
+
 [![latest release badge][]](https://github.com/patrickf1/fzf.fish/releases)
 [![build status badge][]](https://github.com/patrickf1/fzf.fish/actions)
 [![awesome badge][]](https://git.io/awsm.fish)

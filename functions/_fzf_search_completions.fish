@@ -23,7 +23,7 @@ function _fzf_search_completions --description "Shell completion using fzf"
     # Only skip fzf if there is a single completion and it starts with the expected completion prefix.
     # Otherwise, the completion originates from a match in the description which the user might
     # want to review first (e.g. man ima<TAB> might match `feh`, an image viewer)
-    if test (count $completions) -eq 1; and test (string sub -l (string length -- (commandline -ct)) -- $first_completion) = (commandline -ct)
+    if test (count $completions) -eq 1; and string match -i -q -- "$(commandline -ct)*" $first_completion
         # If there is only one option then we don't need fzf
         set results $first_completion
     else
@@ -108,19 +108,20 @@ function _fzf_search_completions --description "Shell completion using fzf"
         test $has_descriptions = true; and set -l fzf_complete_description_opts \
             --tabstop=(math 2 + $longest_completion)
         set -l fzf_output (
-			string join0 -- $completions \
-			| _fzf_wrapper \
-				--read0 \
-				--print0 \
-				--ansi \
-				--multi \
-				--bind=tab:down,btab:up,change:top,ctrl-space:toggle \
-				--tiebreak=begin \
-				--query=$common_prefix \
-				--print-query \
-				$fzf_complete_description_opts \
-				$fzf_complete_opts \
-			| string split0)
+            string join0 -- $completions \
+            | _fzf_wrapper \
+                --read0 \
+                --print0 \
+                --ansi \
+                --multi \
+                --ignore-case \
+                --bind=tab:down,btab:up,change:top,ctrl-space:toggle \
+                --tiebreak=begin \
+                --query=$common_prefix \
+                --print-query \
+                $fzf_complete_description_opts \
+                $fzf_complete_opts \
+            | string split0)
 
         switch $pipestatus[2]
             case 0

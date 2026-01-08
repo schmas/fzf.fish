@@ -6,15 +6,142 @@
 
 All of the functionality is based on the **[Oddlama fork](https://github.com/oddlama/fzf.fish)**. Go give him some love! 💕
 
+Tab completion functionality integrated from **[fifc](https://github.com/gazorby/fifc)** by gazorby.
+
 [![latest release badge][]](https://github.com/patrickf1/fzf.fish/releases)
 [![build status badge][]](https://github.com/patrickf1/fzf.fish/actions)
 [![awesome badge][]](https://git.io/awsm.fish)
 
 </div>
 
-Augment your [Fish][] command line with mnemonic key bindings to efficiently find what you need using [fzf][].
+Augment your [Fish][] command line with mnemonic key bindings to efficiently find what you need using [fzf][], plus powerful **tab completions** with preview and navigation.
 
 https://user-images.githubusercontent.com/1967248/197308919-51d04602-2d5f-46aa-a96e-6cf1617e3067.mov
+
+## Features
+
+- **🔍 Search commands** - Interactive search for files, git commits, history, processes, and more
+- **⌨️ Tab completions** - Enhanced fzf-powered tab completions with preview, file navigation, and custom rules
+- **🎨 Beautiful previews** - Syntax-highlighted file previews, git diffs, man pages, and more
+
+## Tab Completions
+
+`fzf.fish` now includes powerful tab completions powered by fzf! Press <kbd>Tab</kbd> to trigger interactive completions with previews for:
+
+- **Files and directories** - Recursive search with fd, preview files with bat
+- **Commands** - Preview man pages
+- **Options** - See full option descriptions
+- **Functions** - Preview function definitions  
+- **Processes** - Preview process trees with procs
+- **Custom rules** - Add your own completion behaviors
+
+### Tab Completion Features
+
+- Preview/open any file: text, image, gif, pdf, archive, binary (using external tools)
+- Preview/open command's man page
+- Preview/open function definitions
+- Preview/open full option description when completing commands
+- Recursively search for files and folders when completing paths (using [fd](https://github.com/sharkdp/fd))
+- Preview directory content
+- Preview process trees (using [procs](https://github.com/dalance/procs))
+- Modular: easily add your own completion rules
+- Properly handle paths with spaces (needs fish 3.4+)
+
+### Tab Completion Configuration
+
+After install, set your preferred editor:
+
+```fish
+set -Ux fzf_completions_editor nvim
+```
+
+By default tab completions override <kbd>Tab</kbd>, but you can assign another keybinding:
+
+```fish
+# Bind fzf completions to ctrl-x
+set -U fzf_completions_keybinding \cx
+```
+
+Tab completions can use modern tools if available:
+
+| Prefer                                           | Fallback to | Used for                                  | Custom options                |
+| ------------------------------------------------ | ----------- | ----------------------------------------- | ----------------------------- |
+| [bat](https://github.com/sharkdp/bat)            | cat         | Preview files                             | `$fzf_completions_bat_opts`   |
+| [chafa](https://github.com/hpjansson/chafa)      | file        | Preview images, gif, pdf etc              | `$fzf_completions_chafa_opts` |
+| [hexyl](https://github.com/sharkdp/hexyl)        | file        | Preview binaries                          | `$fzf_completions_hexyl_opts` |
+| [fd](https://github.com/sharkdp/fd)              | find        | Complete paths                            | `$fzf_completions_fd_opts`    |
+| [exa](https://github.com/ogham/exa)              | ls          | Preview directories                       | `$fzf_completions_exa_opts`   |
+| [ripgrep](https://github.com/BurntSushi/ripgrep) | pcregrep    | Search options in man pages               | -                             |
+| [procs](https://github.com/dalance/procs)        | ps          | Complete processes and preview their tree | `$fzf_completions_procs_opts` |
+| [broot](https://github.com/Canop/broot)          | -           | Explore directory trees                   | `$fzf_completions_broot_opts` |
+
+Custom options can be added for any of the commands used by completions using the variables mentioned in the above table.
+
+Example - show line numbers when previewing files:
+
+```fish
+set -U fzf_completions_bat_opts --style=numbers
+```
+
+Show hidden files by default:
+
+```fish
+set -U fzf_completions_show_hidden true
+```
+
+⚠️ Don't use quotes in variables, set them as a list: `set -U fzf_completions_exa_opts --icons --tree`
+
+### Tab Completion Keybindings
+
+| Keybinding | Default | Description | Customize with |
+|------------|---------|-------------|----------------|
+| **Completion trigger** | `tab` | Trigger fzf completion for paths, options, processes, etc. | `fzf_completions_keybinding` |
+| **Open action** | `ctrl-o` | Open detailed view of selected item (file, directory, command, etc.) | `fzf_completions_open_keybinding` |
+
+```fish
+# Change completion trigger to ctrl-space
+set -U fzf_completions_keybinding \c@
+
+# Change open action to ctrl-e
+set -U fzf_completions_open_keybinding ctrl-e
+```
+
+### Write Your Own Tab Completion Rules
+
+Custom rules can easily be added using the `fzf_configure_completions` command. See `fzf_configure_completions -h` for more details.
+
+Basically, a rule allows you to trigger some commands based on specific conditions.
+
+A condition can be either:
+- A regex that must match commandline before the cursor position
+- An arbitrary command that must exit with a non-zero status
+
+If conditions are met, you can bind custom commands:
+- **preview:** Command used for fzf preview
+- **source:** Command that feeds fzf input
+- **open:** Command binded to `fzf_completions_open_keybinding` (defaults to ctrl-o)
+
+All commands have access to variables describing the completion context:
+
+| Variable                        | Description                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `fzf_completions_candidate`     | Currently selected item in fzf                                                                     |
+| `fzf_completions_commandline`   | Commandline part before the cursor position                                                        |
+| `fzf_completions_token`         | Last token from the commandline                                                                    |
+| `fzf_completions_group`         | Group to which fish suggestions belong (directories, files, options or processes)                  |
+| `fzf_completions_extracted`     | Extracted string from the currently selected item using the `extracted` regex, if any              |
+| `fzf_completions_query`         | fzf query. On source command, it is the initial fzf query (passed through `--query` option)       |
+
+Example - interactively search packages in archlinux:
+
+```fish
+fzf_configure_completions \
+    -r '^(pacman|paru)(\\h*\\-S)?\\h+' \
+    -s 'pacman --color=always -Ss "$fzf_completions_token" | string match -r \'^[^\\h+].*\'' \
+    -e '.*/(.*?)\\h.*' \
+    -f "--query ''" \
+    -p 'pacman -Si "$fzf_completions_extracted"'
+```
 
 ## Search commands
 
@@ -220,6 +347,10 @@ Find answers to these questions and more in the [project Wiki](https://github.co
 - Why isn't this [command working](https://github.com/PatrickF1/fzf.fish/wiki/Troubleshooting)?
 - How can I [customize](https://github.com/PatrickF1/fzf.fish/wiki/Cookbook) this command?
 - How can I [contribute](https://github.com/PatrickF1/fzf.fish/wiki/Contributing) to this plugin?
+
+## Credits
+
+Tab completion functionality is integrated from [fifc](https://github.com/gazorby/fifc) by [gazorby](https://github.com/gazorby), with additional enhancements from [schmas/fifc](https://github.com/schmas/fifc). All credit for the original tab completion implementation goes to the original author and contributors.
 
 [awesome badge]: https://awesome.re/mentioned-badge.svg
 [bat]: https://github.com/sharkdp/bat

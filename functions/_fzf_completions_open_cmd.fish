@@ -1,0 +1,3 @@
+function _fzf_completions_open_cmd
+    _fzf_completions_preview_cmd $fzf_completions_candidate
+end

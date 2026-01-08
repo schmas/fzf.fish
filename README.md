@@ -33,6 +33,18 @@ Use `fzf.fish` to interactively find and insert file paths, git commit hashes, a
   - if the current token is a directory with a trailing slash (e.g. `.config/<CURSOR>`), then that directory is searched instead
   - [ignores files that are also ignored by git](#fd-gi)
 
+### 🌿 Search Git Branch
+
+- **Fzf input:** all local and remote git branches in the current repository
+- **Output:** branch names
+- **Key binding and mnemonic:** <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> (`B` for branch)
+- **Preview window:** branch information including last commit, author, date, and comparison with current branch
+- **Remarks**
+  - press <kbd>Ctrl</kbd>+<kbd>L</kbd> to show only local branches
+  - press <kbd>Ctrl</kbd>+<kbd>R</kbd> to show only remote branches
+  - press <kbd>Ctrl</kbd>+<kbd>A</kbd> to show all branches
+  - press <kbd>Ctrl</kbd>+<kbd>O</kbd> to view detailed branch information
+
 ### 🪵 Search Git Log
 
 ![Search Git Log example](../assets/git_log.png)
@@ -127,6 +139,7 @@ Each command's fzf options can be configured via a variable:
 | Search Directory  | `fzf_directory_opts`  |
 | Search Git Log    | `fzf_git_log_opts`    |
 | Search Git Status | `fzf_git_status_opts` |
+| Search Git Branch | `fzf_git_branch_opts` |
 | Search History    | `fzf_history_opts`    |
 | Search Processes  | `fzf_processes_opts`  |
 | Search Variables  | `fzf_variables_opts`  |

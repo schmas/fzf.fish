@@ -30,6 +30,43 @@ function _fzf_preview_git_branch -d "Preview git branch information"
         set_color green
         echo "● Local branch"
         set_color normal
+        
+        # Check for upstream tracking branch
+        set -l upstream (git rev-parse --abbrev-ref $branch@{upstream} 2>/dev/null)
+        if test $status -eq 0
+            set_color cyan
+            echo "  ↔ Tracking: $upstream"
+            set_color normal
+            
+            # Show tracking status
+            set -l tracking_counts (git rev-list --left-right --count $branch...$upstream 2>/dev/null | string split \t)
+            if test (count $tracking_counts) -eq 2
+                set -l behind $tracking_counts[1]
+                set -l ahead $tracking_counts[2]
+                
+                if test $ahead -gt 0
+                    set_color yellow
+                    echo "    ↑ $ahead commit(s) ahead of upstream"
+                    set_color normal
+                end
+                
+                if test $behind -gt 0
+                    set_color magenta
+                    echo "    ↓ $behind commit(s) behind upstream"
+                    set_color normal
+                end
+                
+                if test $ahead -eq 0 -a $behind -eq 0
+                    set_color green
+                    echo "    ✓ In sync with upstream"
+                    set_color normal
+                end
+            end
+        else
+            set_color yellow
+            echo "  ○ No upstream tracking"
+            set_color normal
+        end
     else if test $is_remote -eq 0
         set_color yellow
         echo "○ Remote branch only"

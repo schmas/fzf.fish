@@ -11,6 +11,7 @@ function _fzf_list_git_branches -d "List git branches with optional filter"
                 grep -v '^HEAD' | \
                 grep -v '^origin/HEAD' | \
                 sed 's/^origin\///' | \
+                grep -v '^origin$' | \
                 sort -V
         case '*'
             # All branches (default)
@@ -18,6 +19,7 @@ function _fzf_list_git_branches -d "List git branches with optional filter"
                 grep -v '^HEAD' | \
                 grep -v '^origin/HEAD' | \
                 sed 's/^origin\///' | \
+                grep -v '^origin$' | \
                 sort -V -u
     end
 end
